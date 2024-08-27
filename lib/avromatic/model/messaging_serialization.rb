@@ -58,8 +58,10 @@ module Avromatic
 
       module Registration
         def register_schemas!
-          register_schema(key_avro_schema, subject: key_avro_schema_subject) if key_avro_schema
-          register_schema(value_avro_schema, subject: value_avro_schema_subject)
+          if Avromatic.register_schemas
+            register_schema(key_avro_schema, subject: key_avro_schema_subject) if key_avro_schema
+            register_schema(value_avro_schema, subject: value_avro_schema_subject)
+          end
           nil
         end
 

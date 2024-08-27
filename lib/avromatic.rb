@@ -14,7 +14,8 @@ module Avromatic
     attr_accessor :schema_registry, :registry_url, :schema_store, :logger,
                   :messaging, :custom_type_registry, :nested_models,
                   :use_custom_datum_reader, :use_custom_datum_writer,
-                  :use_schema_fingerprint_lookup, :allow_unknown_attributes
+                  :use_schema_fingerprint_lookup, :allow_unknown_attributes,
+                  :register_schemas
 
     delegate :register_type, to: :custom_type_registry
   end
@@ -26,6 +27,7 @@ module Avromatic
   self.use_custom_datum_writer = true
   self.use_schema_fingerprint_lookup = true
   self.allow_unknown_attributes = false
+  self.register_schemas = true
 
   def self.configure
     yield self
@@ -55,7 +57,8 @@ module Avromatic
     Avromatic::Messaging.new(
       registry: schema_registry || build_schema_registry,
       schema_store: schema_store,
-      logger: logger
+      logger: logger,
+      register_schemas: register_schemas
     )
   end
 

@@ -35,9 +35,8 @@ module Avromatic
     def encode(message, schema_name: nil, namespace: @namespace, subject: nil)
       schema = @schema_store.find(schema_name, namespace)
 
-      # Schemas are registered under the full name of the top level Avro record
-      # type, or `subject` if it's provided.
-      schema_id = @registry.register(subject || schema.fullname, schema)
+      # Get the schema ID, optionally registering the schema.
+      schema_id = get_schema_id(schema, subject)
 
       stream = StringIO.new
       encoder = Avro::IO::BinaryEncoder.new(stream)
@@ -56,6 +55,23 @@ module Avromatic
       writer.write(message, encoder)
 
       stream.string
+    end
+
+    private
+
+    def get_schema_id(schema, subject)
+      # Schemas are registered under the full name of the top level Avro record
+      # type, or `subject` if it's provided.
+      if register_schemas
+        @registry.register(subject || schema.fullname, schema)
+      else
+        # Attempt to fetch the schema ID without registering.
+        fetch_schema_id(schema, subject)
+      end
+    end
+
+    def fetch_schema_id(schema, subject)
+      @schemas_by_id.key(schema) || @registry.fetch_id(subject || schema.fullname, schema)
     end
   end
 end

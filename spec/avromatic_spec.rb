@@ -85,6 +85,27 @@ describe Avromatic do
         expect(described_class.nested_models.registered?('test.__nested_nested_record_sub_record')).to be(true)
         expect(described_class.nested_models.registered?('test.__nested_nested_record_sub_subsub_record')).to be(true)
       end
+
+      context "with schema registration disabled" do
+        before do
+          Avromatic.configure do |config|
+            config.register_schemas = false
+          end
+        end
+
+        it "does not register schemas but still prepares models" do
+          described_class.prepare!
+          expect(described_class.nested_models.registered?('test.nested_record')).to be(true)
+          expect(described_class.nested_models.registered?('test.nested_nested_record')).to be(true)
+        end
+
+        it "does not register any schemas during eager load" do
+          described_class.eager_load_models = ['NestedRecord']
+          expect { described_class.prepare! }.not_to change {
+            Avromatic.schema_registry.respond_to?(:register)
+          }
+        end
+      end
     end
   end
 end
